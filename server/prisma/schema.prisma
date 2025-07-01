@@ -7,6 +7,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Attendance {
+  id         String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String            @unique @db.ObjectId
+  attendance AttendanceEntry[]
+  summary    AttendanceSummary
+  recordedAt DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+type AttendanceEntry {
+  date     String
+  status   String
+  checkIn  String?
+  checkOut String?
+}
+
+type AttendanceSummary {
+  totalDays Int
+  present   Int
+  late      Int
+  absent    Int
+}
+
+model BmiRecord {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String     @unique @db.ObjectId
+  heightCm   Float?
+  weightKg   Float?
+  bmi        BmiEntry[]
+  category   String
+  recordedAt DateTime   @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+type BmiEntry {
+  date String
+  bmi  Float
+}
+
 enum Role {
   CLIENT
   COACH
@@ -61,13 +102,13 @@ model User {
   firstName     String
   lastName      String
   password      String
-  profileImage  String  @default("/uploads/users/default.svg")
+  profileImage  String    @default("/uploads/users/default.svg")
   emailVerified DateTime?
   role          Role      @default(CLIENT)
   coach         Coach?
 
-  receiver Conversation[] @relation(name: "receiver")
-  sender Conversation[] @relation(name: "sender")
+  receiver      Conversation[]  @relation(name: "receiver")
+  sender        Conversation[]  @relation(name: "sender")
   post          Post[]
   comment       Comment[]
   session       Session[]
@@ -76,235 +117,235 @@ model User {
   issues        Issue[]
   feedbacks     Feedback[]
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  BmiRecord  BmiRecord?
+  Attendance Attendance?
 }
 
 model VerificationCodes {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  code      String    @unique
-  email     String    @unique
-  expires   DateTime
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  code    String   @unique
+  email   String   @unique
+  expires DateTime
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PasswordResetCode {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  code      String    @unique
-  email     String    @unique
-  expires   DateTime
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  code    String   @unique
+  email   String   @unique
+  expires DateTime
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Coach {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId        String    @unique @db.ObjectId
-  birthday      DateTime?
-  address       String?
-  idNumber      String?
-  oneSessionFee   Float?
-  startTimeSlot Int   @default(8)
-  endTimeSlot   Int   @default(17)
-  experience    Experience?
-  description   String?
-  idFrontImage  String?
-  idBackImage   String?
-  cameraImage   String?
-  ratings        Float   @default(0)
-  availableForWithdrawal Float @default(0)
-  certificate    String[] @default([])
-  coachVerified CoachStatus @default(NOT_SUBMITTED)
+  id                     String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId                 String      @unique @db.ObjectId
+  birthday               DateTime?
+  address                String?
+  idNumber               String?
+  oneSessionFee          Float?
+  startTimeSlot          Int         @default(8)
+  endTimeSlot            Int         @default(17)
+  experience             Experience?
+  description            String?
+  idFrontImage           String?
+  idBackImage            String?
+  cameraImage            String?
+  ratings                Float       @default(0)
+  availableForWithdrawal Float       @default(0)
+  certificate            String[]    @default([])
+  coachVerified          CoachStatus @default(NOT_SUBMITTED)
 
-  sessions      Session[]
+  sessions Session[]
 
-  user      User      @relation(fields: [userId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
   paymentAccount PaymentAccount?
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   Withdrawals Withdrawals[]
 }
 
 model PaymentAccount {
-  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
-  coachId             String    @unique @db.ObjectId
-  accountNumber       String
-  accountHolderName   String
-  nameOfBank          String
-  branch              String
+  id                String @id @default(auto()) @map("_id") @db.ObjectId
+  coachId           String @unique @db.ObjectId
+  accountNumber     String
+  accountHolderName String
+  nameOfBank        String
+  branch            String
 
-  coach      Coach      @relation(fields: [coachId], references: [id])
+  coach Coach @relation(fields: [coachId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Post {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  title     String
-  content   String
-  image     String?
-  authorId  String @db.ObjectId
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  title    String
+  content  String
+  image    String?
+  authorId String  @db.ObjectId
 
-  author    User      @relation(fields: [authorId], references: [id])
-  comments  Comment[]
-  likes     Like[]
+  author   User      @relation(fields: [authorId], references: [id])
+  comments Comment[]
+  likes    Like[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Comment {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  content   String
-  postId    String @db.ObjectId
-  authorId  String @db.ObjectId
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  content  String
+  postId   String @db.ObjectId
+  authorId String @db.ObjectId
 
-  post      Post      @relation(fields: [postId], references: [id] , onDelete: Cascade)
-  author    User      @relation(fields: [authorId], references: [id])
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Like {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  postId    String @db.ObjectId
-  userId    String @db.ObjectId
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  postId String @db.ObjectId
+  userId String @db.ObjectId
 
-  post      Post      @relation(fields: [postId], references: [id] , onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Session {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  coachId     String @db.ObjectId
-  userId      String @db.ObjectId
-  date        DateTime
-  timeSlot    Int
-  status      Status @default(PENDING)
-  review      String?
-  rating      Int?
-  link       String?
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  coachId  String   @db.ObjectId
+  userId   String   @db.ObjectId
+  date     DateTime
+  timeSlot Int
+  status   Status   @default(PENDING)
+  review   String?
+  rating   Int?
+  link     String?
 
-  payment     Payment?
+  payment Payment?
 
-  coach       Coach      @relation(fields: [coachId], references: [id])
-  user        User      @relation(fields: [userId], references: [id])
+  coach Coach @relation(fields: [coachId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Payment{
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  sessionId   String?    @db.ObjectId @unique
-  paymentId   String
-  amount      Float
-  fee         Float
-  remaining   Float
-  type        PaymentType @default(SESSION)
-  status      PaymentStatus @default(PENDING)
+model Payment {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId String?       @unique @db.ObjectId
+  paymentId String
+  amount    Float
+  fee       Float
+  remaining Float
+  type      PaymentType   @default(SESSION)
+  status    PaymentStatus @default(PENDING)
 
-  session     Session?      @relation(fields: [sessionId], references: [id])
+  session Session? @relation(fields: [sessionId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Withdrawals {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  coachId     String @db.ObjectId
-  amount      Float
-  status      PaymentStatus @default(PENDING)
+  id      String        @id @default(auto()) @map("_id") @db.ObjectId
+  coachId String        @db.ObjectId
+  amount  Float
+  status  PaymentStatus @default(PENDING)
 
-  coach       Coach      @relation(fields: [coachId], references: [id])
+  coach Coach @relation(fields: [coachId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model FigureDetails {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String @db.ObjectId
-  shoulders   Float
-  chest       Float
-  neck        Float
-  biceps      Float
-  thigh       Float
-  calf        Float
-  waist       Float
-  hip         Float
-  forearm     Float
-  height      Float
-  weight      Float
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String @db.ObjectId
+  shoulders Float
+  chest     Float
+  neck      Float
+  biceps    Float
+  thigh     Float
+  calf      Float
+  waist     Float
+  hip       Float
+  forearm   Float
+  height    Float
+  weight    Float
 
-  user        User      @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // models for chat box 
 model Message {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
   conversationId String @db.ObjectId
-  message     String
-  sender      String 
-  receiver    String
+  message        String
+  sender         String
+  receiver       String
 
   conversation Conversation @relation(fields: [conversationId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Conversation {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  senderId    String @db.ObjectId
-  receiverId  String @db.ObjectId
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  senderId   String @db.ObjectId
+  receiverId String @db.ObjectId
 
-  sender      User      @relation(name: "sender" , fields: [senderId], references: [id])
-  receiver    User      @relation(name: "receiver", fields: [receiverId], references: [id])
+  sender   User @relation(name: "sender", fields: [senderId], references: [id])
+  receiver User @relation(name: "receiver", fields: [receiverId], references: [id])
 
-  messages    Message[]
+  messages Message[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Issue {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  issueId     Int       @unique
-  userId      String    @db.ObjectId
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  issueId     Int     @unique
+  userId      String  @db.ObjectId
   issue       String
-  response       String?
+  response    String?
   isAdminRead Boolean @default(false)
   isUserRead  Boolean @default(true)
 
-  user        User      @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-
 model Feedback {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String    @db.ObjectId
-  feedback    String
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String @db.ObjectId
+  feedback String
 
-  user        User      @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
