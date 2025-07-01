@@ -54,6 +54,7 @@ import ClientSideBar from "./components/sideBars/SideBar.Client";
 import CoachSideBar from "./components/sideBars/SideBar.Coach";
 import AdminPayments from "./pages/admin/Payment.Admin";
 import AdminAppointments from "./pages/admin/Appointments.Admin";
+import BmiPage from "./pages/client/Bmi.Client";
 
 const ROLES = {
   Client: "CLIENT",
@@ -94,6 +95,7 @@ function App() {
               <Route path="appointments" element={<ClientAppointments />} />
               <Route path="posts" element={<ClientPosts />} />
               <Route path="chat" element={<ChatBox />} />
+              <Route path="bmi" element={<BmiPage />} />
               <Route
                 path="notifications"
                 element={
