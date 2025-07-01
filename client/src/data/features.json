@@ -1,0 +1,40 @@
+{
+  "features": [
+    {
+      "title": "Member Management",
+      "content": "Members can easily register, update their profiles, set fitness goals, and monitor their progress over time. The system also allows seamless renewal of subscription plans, ensuring uninterrupted access to services."
+    },
+    {
+      "title": "Membership Plans",
+      "content": "The platform offers a variety of membership plans with customizable pricing, duration, and access levels. This flexibility allows gyms to cater to diverse client needs and improve member retention."
+    },
+    {
+      "title": "Check-In/Check-Out System",
+      "content": "A biometric fingerprint-based system enables quick and secure member check-ins and check-outs, providing accurate attendance tracking and enhancing overall security."
+    },
+    {
+      "title": "Class Scheduling and Booking",
+      "content": "Members can view available fitness classes and book slots in real-time. The scheduling feature helps avoid overbooking and allows trainers to manage their timetables efficiently."
+    },
+    {
+      "title": "Trainer Management",
+      "content": "Administrators can maintain detailed records of trainers, including experience, assigned clients, and performance metrics. This feature helps optimize staff allocation and improve service quality."
+    },
+    {
+      "title": "Integrated Payment System",
+      "content": "The system supports secure payment processing and automatically sends confirmation receipts to members via email or SMS. It ensures a smooth transaction experience and keeps records organized."
+    },
+    {
+      "title": "Reports and Analytics",
+      "content": "Generate insightful reports on member health progress, attendance, and gym revenue. These analytics support data-driven decisions for better management and growth planning."
+    },
+    {
+      "title": "Personalized Fitness Plans",
+      "content": "Based on member profiles, BMI, and specific health conditions, the system can automatically generate tailored workout and nutrition plans to suit individual goals and capabilities."
+    },
+    {
+      "title": "Injury Management",
+      "content": "Members with injuries can be assigned customized, lighter training routines. Access to certain equipment or sessions can be restricted to ensure safe recovery and prevent further harm."
+    }
+  ]
+}
