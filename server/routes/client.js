@@ -8,6 +8,7 @@ const { addFigureData } = require("./client/analytics/add-figure-data");
 const { getUserAnalytics } = require("./client/analytics/get-analytics");
 const { getSession } = require("./client/session/get-session");
 const { finishSession } = require("./client/session/finish-session");
+const {getBmiByUserId} = require("./client/bmi/getBmiByUserId");
 const router = express.Router();
 
 router.get("/session", async (req, res) => {
@@ -37,5 +38,10 @@ router.post("/figure", async (req, res) => {
 router.get("/analytics/:username/:type?", async (req, res) => {
   return await getUserAnalytics(req, res);
 });
-
+router.post("/bmi/:userId", async (req, res) => {
+  return await getBmiByUserId(req, res);
+});
+router.post("/bmi", async (req, res) => {
+  return await getBmiByUserId(req, res);
+});
 module.exports = router;
