@@ -5,22 +5,25 @@ import dayjs from "dayjs";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { getUserAttendanceByUserId } from "../services/attendanceService.js";
+import { useSelector } from "react-redux";
 
 export default function Attendance() {
+  const { user } = useSelector((state) => state.user);
   const [attendanceData, setAttendanceData] = useState([]);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
 
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     if (user) {
-      getUserAttendanceByUserId(user._id).then((data) => {
+      getUserAttendanceByUserId().then((data) => {
         setAttendanceData(data.attendance || []);
+        console.log("Attendance response:", data);
       });
+      console.log("User is:", user);
     }
-  }, []);
+  }, [user]);
 
   const handleGenerate = () => {
     const from = dayjs(startDate).format("YYYY-MM-DD");
@@ -28,16 +31,19 @@ export default function Attendance() {
     generateAttendancePdf(attendanceData, from, to);
   };
 
-
   return (
-    <div className="p-8 bg-slate-900 border border-slate-700 rounded-lg max-w-xl mx-auto">
+    <div className="mx-auto max-w-xl rounded-lg border border-slate-700 bg-slate-900 p-8">
       {/* Attendance PDF Export Section */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-purple-400">Attendance PDF Export</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-purple-400">
+          Attendance PDF Export
+        </h2>
       </div>
-      <div className="flex gap-4 items-center mb-4">
+      <div className="mb-4 flex items-center gap-4">
         <div>
-          <label className="block font-bold mb-2 text-gray-500">Start Date</label>
+          <label className="mb-2 block font-bold text-gray-500">
+            Start Date
+          </label>
           <DatePicker
             selected={startDate}
             onChange={(date) => setStartDate(date)}
@@ -45,14 +51,14 @@ export default function Attendance() {
             startDate={startDate}
             endDate={endDate}
             dateFormat="MMM dd, yyyy"
-            className="bg-slate-900 border border-slate-700 text-purple-400 px-2 py-1 rounded w-full"
+            className="w-full rounded border border-slate-700 bg-slate-900 px-2 py-1 text-purple-400"
             calendarClassName="!bg-slate-900 !border-slate-700 !text-purple-400"
             popperClassName="!bg-slate-900 !border-slate-700 !text-purple-400"
           />
         </div>
 
         <div>
-          <label className="block font-bold mb-2 text-gray-500">End Date</label>
+          <label className="mb-2 block font-bold text-gray-500">End Date</label>
           <DatePicker
             selected={endDate}
             onChange={(date) => setEndDate(date)}
@@ -61,7 +67,7 @@ export default function Attendance() {
             endDate={endDate}
             minDate={startDate}
             dateFormat="MMM dd, yyyy"
-            className="bg-slate-900 border border-slate-700 text-purple-400 px-2 py-1 rounded w-full"
+            className="w-full rounded border border-slate-700 bg-slate-900 px-2 py-1 text-purple-400"
             calendarClassName="!bg-slate-900 !border-slate-700 !text-purple-400"
             popperClassName="!bg-slate-900 !border-slate-700 !text-purple-400"
           />
@@ -70,7 +76,7 @@ export default function Attendance() {
 
       <button
         onClick={handleGenerate}
-        className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded border border-slate-700 transition-colors"
+        className="rounded border border-slate-700 bg-purple-700 px-4 py-2 text-white transition-colors hover:bg-purple-800"
       >
         Download PDF
       </button>
@@ -80,9 +86,12 @@ export default function Attendance() {
 
       {/* BMI Details Section */}
       <div className="mb-4">
-        <h2 className="text-xl font-semibold text-purple-400 mb-2">BMI Details</h2>
-        <p className="text-gray-400 mb-4">
-          Track your Body Mass Index (BMI) to monitor your health and fitness progress.
+        <h2 className="mb-2 text-xl font-semibold text-purple-400">
+          BMI Details
+        </h2>
+        <p className="mb-4 text-gray-400">
+          Track your Body Mass Index (BMI) to monitor your health and fitness
+          progress.
         </p>
         <button
           onClick={() => {
@@ -90,7 +99,7 @@ export default function Attendance() {
             // You may need to adjust the route as per your app's routing
             navigate("/client/bmi");
           }}
-          className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded border border-slate-700 transition-colors"
+          className="rounded border border-slate-700 bg-purple-700 px-4 py-2 text-white transition-colors hover:bg-purple-800"
         >
           BMI Calculator
         </button>

@@ -71,7 +71,7 @@ const ClientMeasurements = () => {
   };
 
   return (
-    <div className="w-full xl:container px-4 py-6">
+    <div className="w-full px-4 py-6 xl:container">
       <h1 className="pb-5 text-center text-base font-semibold text-purple-100 sm:text-xl lg:text-2xl xl:pb-8">
         Add Your Measurements - centimeters(cm)
       </h1>

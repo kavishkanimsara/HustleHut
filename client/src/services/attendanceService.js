@@ -1,20 +1,16 @@
-export async function getUserAttendanceByUserId(userId) {
+import axios from "axios";
+
+export async function getUserAttendanceByUserId() {
   try {
-    const response = await fetch(`${import.meta.env.VITE_APP_IMAGE_URL}/attendance/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
+    const response = await axios.get("/client/attendance", {
+      withCredentials: true,
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch attendance data');
-    }
-
-    return data;
+    return response.data;
   } catch (error) {
-    throw new Error(`Attendance fetch error: ${error.message}`);
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch attendance data",
+    );
   }
 }

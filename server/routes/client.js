@@ -8,7 +8,14 @@ const { addFigureData } = require("./client/analytics/add-figure-data");
 const { getUserAnalytics } = require("./client/analytics/get-analytics");
 const { getSession } = require("./client/session/get-session");
 const { finishSession } = require("./client/session/finish-session");
-const {getBmiByUserId} = require("./client/bmi/getBmiByUserId");
+const { getBmiByUserId } = require("./client/bmi/getBmiByUserId");
+const { addOrUpdateBmiRecord } = require("./client/bmi/addOrUpdateBmiRecord");
+const {
+  getUserAttendanceByUserId,
+} = require("./client/attendance/getUserAttendanceByUserId");
+const {
+  markAttendanceIfNotExists,
+} = require("./client/attendance/markAttendanceIfNotExists");
 const router = express.Router();
 
 router.get("/session", async (req, res) => {
@@ -38,10 +45,16 @@ router.post("/figure", async (req, res) => {
 router.get("/analytics/:username/:type?", async (req, res) => {
   return await getUserAnalytics(req, res);
 });
-router.post("/bmi/:userId", async (req, res) => {
+router.get("/bmi", async (req, res) => {
   return await getBmiByUserId(req, res);
 });
 router.post("/bmi", async (req, res) => {
-  return await getBmiByUserId(req, res);
+  return await addOrUpdateBmiRecord(req, res);
+});
+router.get("/attendance", async (req, res) => {
+  return await getUserAttendanceByUserId(req, res);
+});
+router.post("/attendance", async (req, res) => {
+  return await markAttendanceIfNotExists(req, res);
 });
 module.exports = router;

@@ -1,17 +1,42 @@
-import { useState } from "react";
-import { addBmiRecord, getBmiByUserId } from "../../services/bmiService";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Plot from "react-plotly.js";
 import ClientTopNavbar from "../../components/sideBars/SideBar.Client";
+import { useSelector } from "react-redux";
 
 export default function BmiPage() {
   const [bmiData, setBmiData] = useState(null);
-  const [error] = useState(null);
+  const [error, setError] = useState(null);
   const [unit, setUnit] = useState("us");
   const [feet, setFeet] = useState("");
   const [inches, setInches] = useState("");
   const [cm, setCm] = useState("");
   const [weight, setWeight] = useState("");
   const [bmiResult, setBmiResult] = useState(null);
+  const [loading, setLoading] = useState(false); // loading state for add
+  const { user } = useSelector((state) => state.user);
+
+  // Load BMI data on mount if user exists
+  useEffect(() => {
+    const fetchBmiData = async () => {
+      if (!user) return;
+      try {
+        const response = await axios.get("/client/bmi", {
+          withCredentials: true,
+        });
+        if (response && response.data) {
+          setBmiData(response.data);
+        }
+      } catch (err) {
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            "Failed to fetch BMI data",
+        );
+      }
+    };
+    fetchBmiData();
+  }, [user]);
 
   const handleUnitChange = (e) => {
     setUnit(e.target.value);
@@ -23,15 +48,15 @@ export default function BmiPage() {
   };
 
   const handleAddRecord = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
     if (!user || !bmiResult) {
       return;
     }
-
+    setLoading(true);
+    setError(null);
     const today = new Date().toISOString().split("T")[0];
     const newRecord = {
-      userId: user._id,
-      bmi: [{ date: today, bmi: parseFloat(bmiResult) }],
+      heightCm: unit === "metric" ? cm : undefined,
+      weightKg: unit === "metric" ? weight : undefined,
       category:
         bmiResult < 18.5
           ? "Underweight"
@@ -40,15 +65,32 @@ export default function BmiPage() {
             : bmiResult < 30
               ? "Overweight"
               : "Obese",
+      date: today,
+      bmi: parseFloat(bmiResult),
       recordedAt: new Date().toISOString(),
     };
 
     try {
-      await addBmiRecord(newRecord);
-      const updated = await getBmiByUserId(user._id);
-      setBmiData(updated);
+      const postResponse = await axios.post("/client/bmi", newRecord, {
+        withCredentials: true,
+      });
+      if (postResponse && postResponse.data) {
+        // Optionally handle postResponse.data.message or insertedId
+      }
+      const getResponse = await axios.get("/client/bmi", {
+        withCredentials: true,
+      });
+      if (getResponse && getResponse.data) {
+        setBmiData(getResponse.data);
+      }
     } catch (err) {
-      // handle error if needed
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to add or fetch BMI record",
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -201,9 +243,36 @@ export default function BmiPage() {
               </button>
               <button
                 onClick={handleAddRecord}
-                className="rounded bg-purple-700 px-4 py-2 text-white hover:bg-purple-800"
+                className={`flex items-center justify-center rounded bg-purple-700 px-4 py-2 text-white hover:bg-purple-800 ${loading ? "cursor-not-allowed opacity-60" : ""}`}
+                disabled={loading}
               >
-                ADD
+                {loading ? (
+                  <>
+                    <svg
+                      className="mr-2 h-5 w-5 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    Adding...
+                  </>
+                ) : (
+                  "ADD"
+                )}
               </button>
             </div>
 
