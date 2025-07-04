@@ -55,6 +55,9 @@ import CoachSideBar from "./components/sideBars/SideBar.Coach";
 import AdminPayments from "./pages/admin/Payment.Admin";
 import AdminAppointments from "./pages/admin/Appointments.Admin";
 import BmiPage from "./pages/client/Bmi.Client";
+import ProgressPage from "./pages/client/ProgressPage";
+import ProgressOverview from "./pages/coach/ProgressOverview";
+import ProgressHistory from "./pages/client/ProgressHistory";
 
 const ROLES = {
   Client: "CLIENT",
@@ -96,6 +99,8 @@ function App() {
               <Route path="posts" element={<ClientPosts />} />
               <Route path="chat" element={<ChatBox />} />
               <Route path="bmi" element={<BmiPage />} />
+              <Route path="progress" element={<ProgressPage />} />
+              <Route path="progress/history" element={<ProgressHistory />} />
               <Route
                 path="notifications"
                 element={
@@ -122,6 +127,7 @@ function App() {
               <Route path="chat" element={<ChatBox />} />
               <Route path="clients" element={<CoachClients />} />
               <Route path="earnings" element={<CoachEarnings />} />
+              <Route path="overview" element={<ProgressOverview />} />
               <Route
                 path="analytics/:client"
                 element={<CoachClientAnalytics />}

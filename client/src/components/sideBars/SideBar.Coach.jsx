@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-
+import { GiProgression } from "react-icons/gi";
 import {
   MdDashboard,
   MdAccessTimeFilled,
@@ -36,7 +36,11 @@ import { Button } from "../ui/button";
 
 const urls = [
   { icon: <MdDashboard />, name: "Dashboard", link: "/coach" },
-  { icon: <MdAccessTimeFilled />, name: "Appointments", link: "/coach/appointments" },
+  {
+    icon: <MdAccessTimeFilled />,
+    name: "Appointments",
+    link: "/coach/appointments",
+  },
   // { icon: <IoChatbox />, name: "Chat", link: "/coach/chat" },
   { icon: <MdOutlinePostAdd />, name: "Publish", link: "/coach/posts" },
   { icon: <FaMoneyBillTrendUp />, name: "Earnings", link: "/coach/earnings" },
@@ -44,6 +48,11 @@ const urls = [
   { icon: <TbListDetails />, name: "General Details", link: "/coach/general" },
   // { icon: <MdOutlineWork />, name: "Professional Details", link: "/coach/professionals" },
   { icon: <MdPayments />, name: "Payment Details", link: "/coach/payments" },
+  {
+    icon: <GiProgression />,
+    name: "Progress Overview",
+    link: "/coach/overview",
+  },
   { icon: <IoMdArrowRoundBack />, name: "Back To Home", link: "/" },
 ];
 
@@ -75,20 +84,21 @@ const CoachTopNavbar = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 shadow-md bg-white text-black">
+      <nav className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-white px-6 py-3 text-black shadow-md">
         {/* Left: Title */}
-        <div className="font-bold text-lg">Coach Panel</div>
+        <div className="text-lg font-bold">Coach Panel</div>
 
         {/* Center: Navigation Links */}
-        <div className="hidden md:flex space-x-6 overflow-x-auto">
+        <div className="hidden space-x-6 overflow-x-auto md:flex">
           {urls.map(({ icon, name, link }, i) => (
             <Link
               key={i}
               to={link}
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-sm whitespace-nowrap transition ${location.pathname === link
-                ? "bg-purple-100 font-semibold text-purple-800"
-                : "hover:bg-gray-100"
-                }`}
+              className={`flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-1 text-sm transition ${
+                location.pathname === link
+                  ? "bg-purple-100 font-semibold text-purple-800"
+                  : "hover:bg-gray-100"
+              }`}
             >
               {icon}
               {name}
@@ -101,7 +111,7 @@ const CoachTopNavbar = () => {
           <button
             onClick={() => setIsFeedbackOpen(true)}
             title="Submit Feedback"
-            className="flex items-center gap-1 rounded bg-black text-white px-3 py-1 text-sm font-medium hover:bg-gray-800 transition"
+            className="flex items-center gap-1 rounded bg-black px-3 py-1 text-sm font-medium text-white transition hover:bg-gray-800"
           >
             <MdFeedback className="text-lg" />
             Feedback
@@ -110,19 +120,19 @@ const CoachTopNavbar = () => {
           <button
             onClick={() => setIsIssueOpen(true)}
             title="Submit Issue"
-            className="flex items-center gap-1 rounded bg-black text-white px-3 py-1 text-sm font-medium hover:bg-gray-800 transition"
+            className="flex items-center gap-1 rounded bg-black px-3 py-1 text-sm font-medium text-white transition hover:bg-gray-800"
           >
             Issues
             <AiOutlineIssuesClose className="text-lg" />
             {unreadIssues > 0 && (
-              <FaCircle className="ml-1 h-3 w-3 text-sky-500 animate-pulse" />
+              <FaCircle className="ml-1 h-3 w-3 animate-pulse text-sky-500" />
             )}
           </button>
 
           <button
             onClick={logout}
             title="Logout"
-            className="flex items-center gap-1 rounded bg-red-600 text-white px-3 py-1 text-sm font-medium hover:bg-red-700 transition"
+            className="flex items-center gap-1 rounded bg-red-600 px-3 py-1 text-sm font-medium text-white transition hover:bg-red-700"
           >
             <CgLogOut className="text-lg" />
             Logout
@@ -185,7 +195,7 @@ const SubmitIssue = ({ isOpen, setIsOpen }) => {
         <DialogFooter>
           <Button
             onClick={handleSubmit}
-            className="bg-black hover:bg-gray-800 text-white"
+            className="bg-black text-white hover:bg-gray-800"
             disabled={loading}
           >
             {loading ? "Submitting..." : "Submit Issue"}
@@ -221,14 +231,17 @@ const SubmitFeedback = ({ isOpen, setIsOpen }) => {
         <DialogHeader>
           <DialogTitle>Submit Feedback</DialogTitle>
           <DialogDescription>
-            Please describe your feedback in detail so that we can help you better.
+            Please describe your feedback in detail so that we can help you
+            better.
           </DialogDescription>
         </DialogHeader>
 
         <div className="mt-3">
           <Label htmlFor="feedback" className="flex justify-between">
             Feedback
-            <span className="text-sm text-gray-400">{feedback.length}/1000</span>
+            <span className="text-sm text-gray-400">
+              {feedback.length}/1000
+            </span>
           </Label>
           <Textarea
             id="feedback"
@@ -243,7 +256,7 @@ const SubmitFeedback = ({ isOpen, setIsOpen }) => {
         <DialogFooter>
           <Button
             onClick={handleSubmit}
-            className="bg-black hover:bg-gray-800 text-white"
+            className="bg-black text-white hover:bg-gray-800"
             disabled={loading}
           >
             {loading ? "Submitting..." : "Submit Feedback"}
