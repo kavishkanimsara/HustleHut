@@ -13,7 +13,15 @@ const { getSessions } = require("./coach/session/get-sessions");
 const { acceptSession } = require("./coach/session/accept-session");
 const { getClients } = require("./coach/get-clients");
 const { getCoachStatistics } = require("./coach/statistics");
-const { getCoachEarnings, getCoachEarningsPDF } = require("./coach/get-earnings");
+const {
+  getCoachEarnings,
+  getCoachEarningsPDF,
+} = require("./coach/get-earnings");
+const {
+  getAllProgress,
+  getUserProgressByID,
+  updateTrainerFeedback,
+} = require("./client/progress/progress.controller");
 const router = express.Router();
 
 // custom error handling middleware for Multer
@@ -112,6 +120,21 @@ router.get("/earnings/pdf", async (req, res) => {
 
 router.get("/statistics", async (req, res) => {
   return await getCoachStatistics(req, res);
+});
+
+router.get("/progress", async (req, res) => {
+  const { userId } = req.query;
+
+  if (userId) {
+    return await getUserProgressByID(req, res);
+  } else {
+    return await getAllProgress(req, res);
+  }
+});
+
+// ✅ Update trainer feedback (schedule + comment)
+router.put("/progress/:progressId/feedback", async (req, res) => {
+  return await updateTrainerFeedback(req, res);
 });
 
 module.exports = router;

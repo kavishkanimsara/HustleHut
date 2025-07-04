@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import DialogBox from "./DialogBox.jsx";
-import { uploadProgress } from "../../services/ProgressService.js";
+import { useSelector } from "react-redux";
 
 function ProgressForm() {
   const [description, setDescription] = useState("");
@@ -11,6 +12,9 @@ function ProgressForm() {
   const [showDialog, setShowDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.user);
+
+  // Load BMI data on mount if user exists
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -29,11 +33,16 @@ function ProgressForm() {
 
     try {
       setLoading(true);
-      const user = JSON.parse(localStorage.getItem("user"));
-      const userId = user?._id;
+      const userId = user?.email;
       if (!userId) throw new Error("User not logged in.");
 
-      await uploadProgress(userId, description, images);
+      const formData = new FormData();
+      formData.append("description", description);
+      images.forEach((img) => formData.append("images", img));
+
+      await axios.post("/client/progress", formData, {
+        withCredentials: true,
+      });
 
       setDialogMessage("✅ Progress uploaded successfully!");
       setDescription("");
@@ -41,7 +50,9 @@ function ProgressForm() {
       setPreviews([]);
       e.target.reset();
     } catch (err) {
-      setDialogMessage("❌ Upload failed: " + err.message);
+      setDialogMessage(
+        "❌ Upload failed: " + (err.response?.data?.message || err.message),
+      );
     } finally {
       setLoading(false);
       setShowDialog(true);
@@ -53,7 +64,7 @@ function ProgressForm() {
   };
 
   return (
-    <div className="flex flex-col-reverse gap-4 w-full items-center justify-center bg-slate-900 py-8 text-purple-400">
+    <div className="flex w-full flex-col-reverse items-center justify-center gap-4 bg-slate-900 py-8 text-purple-400">
       <div className="mb-4 flex justify-end">
         <button
           type="button"

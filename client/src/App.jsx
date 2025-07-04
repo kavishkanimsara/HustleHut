@@ -58,6 +58,7 @@ import BmiPage from "./pages/client/Bmi.Client";
 import ProgressPage from "./pages/client/ProgressPage";
 import ProgressOverview from "./pages/coach/ProgressOverview";
 import ProgressHistory from "./pages/client/ProgressHistory";
+import ProgressHistoryCoach from "./pages/coach/ProgressHistory";
 
 const ROLES = {
   Client: "CLIENT",
@@ -128,6 +129,10 @@ function App() {
               <Route path="clients" element={<CoachClients />} />
               <Route path="earnings" element={<CoachEarnings />} />
               <Route path="overview" element={<ProgressOverview />} />
+              <Route
+                path="progress/:userId"
+                element={<ProgressHistoryCoach />}
+              />
               <Route
                 path="analytics/:client"
                 element={<CoachClientAnalytics />}

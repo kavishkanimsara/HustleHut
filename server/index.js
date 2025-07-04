@@ -3,6 +3,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const multer = require("multer");
 
 // create express app and socket server
 const { app, server } = require("./socket/socket.js");
@@ -65,6 +66,29 @@ app.use("/admin", authenticateToken(["ADMIN"]), require("./routes/admin"));
 
 // public routes
 app.use("/public", require("./routes/public"));
+
+// Error handling middleware for multer
+app.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return res
+        .status(400)
+        .json({ message: "File too large. Maximum size is 5MB." });
+    }
+    if (error.code === "LIMIT_FILE_COUNT") {
+      return res
+        .status(400)
+        .json({ message: "Too many files. Maximum is 5 files." });
+    }
+    if (error.code === "LIMIT_UNEXPECTED_FILE") {
+      return res.status(400).json({ message: "Unexpected file field." });
+    }
+  }
+  if (error.message === "Only image files are allowed!") {
+    return res.status(400).json({ message: error.message });
+  }
+  next(error);
+});
 
 // server run on port 8000 or env port
 const port = process.env.PORT || 8000;

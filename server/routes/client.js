@@ -16,9 +16,16 @@ const {
 const {
   markAttendanceIfNotExists,
 } = require("./client/attendance/markAttendanceIfNotExists");
-const {getAllProgress, saveProgress, getAllProgressWithUserInfo, getLatestProgressPerUser, getProgressByUserId,
-  updateTrainerFeedback, updateUserComment
+const {
+  getAllProgress,
+  saveProgress,
+  getAllProgressWithUserInfo,
+  getLatestProgressPerUser,
+  getProgressByUserId,
+  updateTrainerFeedback,
+  updateUserComment,
 } = require("./client/progress/progress.controller");
+const { uploadProgressImages } = require("../utils/multer");
 const router = express.Router();
 
 router.get("/session", async (req, res) => {
@@ -44,10 +51,15 @@ router.put("/session/:id", async (req, res) => {
 router.post("/figure", async (req, res) => {
   return await addFigureData(req, res);
 });
-// ✅ Save a new progress entry (POST)
-router.post("/progress", async (req, res) => {
-  return await saveProgress(req, res);
-});
+
+// ✅ Save a new progress entry (POST) - with file upload support
+router.post(
+  "/progress",
+  uploadProgressImages.array("images", 5),
+  async (req, res) => {
+    return await saveProgress(req, res);
+  }
+);
 
 // ✅ Get all progress entries (raw)
 router.get("/progress", async (req, res) => {

@@ -1,22 +1,30 @@
 import { useState, useEffect } from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
+import axios from "axios";
 
 function ProgressDetails({ progress, onSaveFeedback, userRole }) {
-  const [schedule, setSchedule] = useState('');
-  const [feedbackComments, setFeedbackComments] = useState('');
+  const [schedule, setSchedule] = useState("");
+  const [feedbackComments, setFeedbackComments] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (progress) {
-      setSchedule(progress.schedule || '');
-      setFeedbackComments(progress.comments || '');
+      setSchedule(progress.schedule || "");
+      setFeedbackComments(progress.comments || "");
       setCurrentImageIndex(0);
     }
   }, [progress]);
 
   if (!progress) {
-    return <p>Select a progress item from the right column to review and give feedback.</p>;
+    return (
+      <div className="flex h-64 items-center justify-center text-gray-400">
+        <p className="text-center">
+          Select a progress item from the right column to review and give
+          feedback.
+        </p>
+      </div>
+    );
   }
 
   const getImageUrl = (imagePath) => {
@@ -30,100 +38,145 @@ function ProgressDetails({ progress, onSaveFeedback, userRole }) {
 
   const handlePrev = () => {
     setCurrentImageIndex((prev) =>
-      prev === 0 ? (progress.images.length - 1) : prev - 1
+      prev === 0 ? progress.images.length - 1 : prev - 1,
     );
   };
 
   const handleNext = () => {
     setCurrentImageIndex((prev) =>
-      prev === (progress.images.length - 1) ? 0 : prev + 1
+      prev === progress.images.length - 1 ? 0 : prev + 1,
     );
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await onSaveFeedback(schedule, feedbackComments);
+      const response = await axios.put(
+        `/coach/progress/${progress.id}/feedback`,
+        {
+          schedule,
+          comments: feedbackComments,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+
+      // Call the parent callback if provided
+      if (onSaveFeedback) {
+        await onSaveFeedback(schedule, feedbackComments);
+      }
+
+      console.log("Feedback saved successfully:", response.data);
     } catch (err) {
-      console.error('Error during save:', err);
+      console.error("Error saving feedback:", err);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const isTrainer = userRole === 'trainer';
+  const isTrainer = userRole === "COACH";
 
   return (
-    <div style={styles.container}>
-      <div style={styles.imageContainer}>
+    <div className="w-full rounded-lg border border-slate-700 bg-slate-900 p-4 md:p-6">
+      {/* Image Carousel */}
+      <div className="relative mb-4 w-full overflow-hidden rounded-lg">
         <img
           src={getImageUrl(progress.images[currentImageIndex])}
           alt={`Progress ${currentImageIndex + 1}`}
-          style={styles.image}
+          className="h-48 w-full rounded-lg object-cover md:h-64"
         />
-        <div style={styles.carouselButtons}>
-          <button onClick={handlePrev} style={styles.carouselButton}>‹</button>
-          <button onClick={handleNext} style={styles.carouselButton}>›</button>
-        </div>
-        <div style={styles.pagination}>
-          {progress.images.map((_, index) => (
-            <span
-              key={index}
-              style={{
-                ...styles.dot,
-                backgroundColor: currentImageIndex === index ? '#00b96b' : '#ccc',
-              }}
-            />
-          ))}
-        </div>
+
+        {/* Carousel Navigation Buttons */}
+        {progress.images.length > 1 && (
+          <>
+            <button
+              onClick={handlePrev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 transform rounded-full border-none bg-black/50 p-2 text-2xl text-white transition-colors hover:bg-black/70"
+            >
+              ‹
+            </button>
+            <button
+              onClick={handleNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 transform rounded-full border-none bg-black/50 p-2 text-2xl text-white transition-colors hover:bg-black/70"
+            >
+              ›
+            </button>
+          </>
+        )}
+
+        {/* Pagination Dots */}
+        {progress.images.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 transform space-x-2">
+            {progress.images.map((_, index) => (
+              <span
+                key={index}
+                className={`h-2 w-2 rounded-full transition-all duration-300 ${
+                  currentImageIndex === index ? "bg-purple-400" : "bg-gray-400"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      <div style={styles.descriptionContainer}>
-        <h3 style={styles.title}>{progress.description}</h3>
-        <p style={styles.date}>Date: {new Date(progress.createdAt).toLocaleDateString()}</p>
+      {/* Description */}
+      <div className="mb-6">
+        <h3 className="mb-2 text-lg font-semibold text-purple-400 md:text-xl">
+          {progress.description}
+        </h3>
+        <p className="text-sm text-gray-400">
+          Date: {new Date(progress.createdAt).toLocaleDateString()}
+        </p>
       </div>
 
-      <div style={styles.commentSection}>
-        <h4>Trainer Schedule</h4>
-        <textarea
-          value={schedule}
-          onChange={(e) => setSchedule(e.target.value)}
-          rows="2"
-          placeholder="Schedule..."
-          disabled={!isTrainer}
-          style={{
-            ...styles.textarea,
-            backgroundColor: isTrainer ? '#fff' : '#f0f0f0',
-            cursor: isTrainer ? 'text' : 'not-allowed'
-          }}
-        />
+      {/* Trainer Schedule */}
+      <div className="mb-6">
+        <h4 className="mb-2 font-semibold text-purple-400">Trainer Schedule</h4>
+        {schedule && <p className="mb-2 text-sm text-gray-400">{schedule}</p>}
+        {isTrainer && (
+          <textarea
+            value={schedule}
+            onChange={(e) => setSchedule(e.target.value)}
+            rows="2"
+            placeholder="Schedule..."
+            className="w-full cursor-text resize-none rounded-lg border border-slate-700 bg-slate-800 p-3 text-purple-400 transition-colors hover:border-slate-600 focus:border-purple-400 focus:outline-none"
+          />
+        )}
       </div>
 
-      <div style={styles.commentSection}>
-        <h4>Trainer Comments</h4>
-        <textarea
-          value={feedbackComments}
-          onChange={(e) => setFeedbackComments(e.target.value)}
-          rows="4"
-          placeholder="Comments..."
-          disabled={!isTrainer}
-          style={{
-            ...styles.textarea,
-            backgroundColor: isTrainer ? '#fff' : '#f0f0f0',
-            cursor: isTrainer ? 'text' : 'not-allowed'
-          }}
-        />
+      {/* Trainer Comments */}
+      <div className="mb-6">
+        <h4 className="mb-2 font-semibold text-purple-400">Trainer Comments</h4>
+        {feedbackComments && (
+          <p className="mb-2 text-sm text-gray-400">{feedbackComments}</p>
+        )}
+        {isTrainer && (
+          <textarea
+            value={feedbackComments}
+            onChange={(e) => setFeedbackComments(e.target.value)}
+            rows="4"
+            placeholder="Comments..."
+            disabled={!isTrainer}
+            className={`w-full resize-none rounded-lg border border-slate-700 bg-slate-800 p-3 text-purple-400 transition-colors focus:border-purple-400 focus:outline-none ${
+              isTrainer
+                ? "cursor-text hover:border-slate-600"
+                : "cursor-not-allowed opacity-60"
+            }`}
+          />
+        )}
+
         {isTrainer && (
           <button
             onClick={handleSave}
             disabled={isSaving}
-            style={{
-              ...styles.button,
-              backgroundColor: isSaving ? '#ccc' : '#00b96b',
-              cursor: isSaving ? 'not-allowed' : 'pointer',
-            }}
+            className={`mt-3 rounded-lg px-6 py-2 font-semibold text-white transition-colors ${
+              isSaving
+                ? "cursor-not-allowed bg-gray-600"
+                : "cursor-pointer bg-purple-600 hover:bg-purple-700"
+            }`}
           >
-            {isSaving ? 'Saving...' : 'Save Feedback'}
+            {isSaving ? "Saving..." : "Save Feedback"}
           </button>
         )}
       </div>
@@ -131,82 +184,9 @@ function ProgressDetails({ progress, onSaveFeedback, userRole }) {
   );
 }
 
-const styles = {
-  container: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: '10px',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-    padding: '20px',
-    fontFamily: 'Arial'
-  },
-  imageContainer: {
-    position: 'relative',
-    width: '100%',
-    borderRadius: '10px',
-    overflow: 'hidden',
-    marginBottom: '10px'
-  },
-  image: {
-    width: '100%',
-    height: 'auto',
-    borderRadius: '10px'
-  },
-  carouselButtons: {
-    position: 'absolute',
-    top: '50%',
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'space-between',
-    transform: 'translateY(-50%)'
-  },
-  carouselButton: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    color: '#fff',
-    border: 'none',
-    fontSize: '24px',
-    padding: '8px 16px',
-    cursor: 'pointer',
-    borderRadius: '50%'
-  },
-  pagination: {
-    position: 'absolute',
-    bottom: '10px',
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'center'
-  },
-  dot: {
-    width: '10px',
-    height: '10px',
-    borderRadius: '50%',
-    margin: '0 5px',
-    transition: 'all 0.3s ease'
-  },
-  descriptionContainer: { marginTop: '10px' },
-  title: { fontSize: '18px', margin: '5px 0' },
-  date: { color: '#666', fontSize: '14px' },
-  commentSection: { marginTop: '20px' },
-  textarea: {
-    width: '100%',
-    padding: '12px',
-    borderRadius: '8px',
-    border: '1px solid #ccc',
-    marginBottom: '15px',
-    fontSize: '14px'
-  },
-  button: {
-    color: '#fff',
-    border: 'none',
-    borderRadius: '6px',
-    padding: '10px 20px',
-    fontWeight: 'bold'
-  }
-};
-
 ProgressDetails.propTypes = {
   progress: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
     images: PropTypes.arrayOf(PropTypes.string).isRequired,
     description: PropTypes.string.isRequired,
     createdAt: PropTypes.string.isRequired,

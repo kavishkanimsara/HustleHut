@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getLatestProgressPerUser } from "../../services/ProgressService";
+import axios from "axios";
 
 const LatestProgressTable = () => {
   const [progressData, setProgressData] = useState([]);
   const [search, setSearch] = useState("");
-  const [resultsPerPage, setResultsPerPage] = useState(10);
+  const [resultsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getLatestProgressPerUser();
-        setProgressData(data);
+        const response = await axios.get("/coach/progress", {
+          withCredentials: true,
+        });
+        setProgressData(response.data);
+        console.log(response.data);
       } catch (err) {
         console.error("Failed to load progress data:", err);
       }
@@ -22,7 +25,7 @@ const LatestProgressTable = () => {
   }, []);
 
   const filteredData = progressData.filter((item) =>
-    item.name.toLowerCase().includes(search.toLowerCase()),
+    item?.description?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const totalPages = Math.ceil(filteredData.length / resultsPerPage);
@@ -33,13 +36,13 @@ const LatestProgressTable = () => {
 
   const handleRowClick = (userId) => {
     if (userId) {
-      navigate(`/trainer/${userId}`);
+      navigate(`/coach/progress/${userId}`);
     }
   };
 
   return (
-    <div className="flex w-full items-center justify-center py-12 text-purple-400 mt-8">
-      <div className="w-full max-w-5xl rounded-lg border border-slate-700 bg-slate-900 p-8 shadow-xl shadow-slate-700/10">
+    <div className="mt-8 flex w-full items-center justify-center px-8 py-8 text-purple-400">
+      <div className="w-full rounded-lg border border-slate-700 bg-slate-900 p-8 shadow-xl shadow-slate-700/10">
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -48,9 +51,6 @@ const LatestProgressTable = () => {
             </h2>
             <p className="text-gray-400">All Progress History</p>
           </div>
-          <button className="rounded bg-purple-700 px-4 py-2 font-semibold text-white transition-colors hover:bg-purple-800">
-            ADD MANUAL ENTRY
-          </button>
         </div>
 
         {/* Controls */}
@@ -65,7 +65,7 @@ const LatestProgressTable = () => {
 
           <div className="flex items-center gap-2">
             <label className="text-gray-400">Show Results</label>
-            <select
+            {/* <select
               value={resultsPerPage}
               onChange={(e) => {
                 setResultsPerPage(Number(e.target.value));
@@ -76,7 +76,7 @@ const LatestProgressTable = () => {
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
-            </select>
+            </select> */}
           </div>
         </div>
 
@@ -89,7 +89,7 @@ const LatestProgressTable = () => {
                   Date
                 </th>
                 <th className="px-4 py-3 text-left font-semibold text-purple-400">
-                  Name
+                  Description
                 </th>
                 <th className="px-4 py-3 text-left font-semibold text-purple-400">
                   Schedule
@@ -104,13 +104,15 @@ const LatestProgressTable = () => {
                   className="cursor-pointer transition-colors hover:bg-slate-800"
                 >
                   <td className="border-b border-slate-800 px-4 py-2">
-                    {new Date(entry.date).toLocaleDateString()}
+                    {new Date(entry.createdAt).toLocaleDateString()}
                   </td>
                   <td className="border-b border-slate-800 px-4 py-2">
-                    {entry.name}
+                    {entry.description}
                   </td>
                   <td className="border-b border-slate-800 px-4 py-2">
-                    {entry.schedule}
+                    {entry.schedule?.length > 20
+                      ? `${entry.schedule.substring(0, 50)}...`
+                      : entry.schedule}
                   </td>
                 </tr>
               ))}
